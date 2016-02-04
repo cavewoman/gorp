@@ -1,0 +1,77 @@
+<!-- container node -->
+<div id="app"></div>
+
+<script src="http://fb.me/react-0.13.0.js"></script>
+<script src="http://fb.me/JSXTransformer-0.13.0.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+
+<script type="text/jsx">
+  /** @jsx React.DOM */
+
+  var TestComponent = React.createClass({
+
+    submit: function(e) {
+      var params = {};
+      params.current_amount = this.refs.currentAmount.getDOMNode().value,
+      params.serving_size = this.refs.servingSize.getDOMNode().value,
+      params.regular_hitches = this.refs.regularHitches.getDOMNode().value,
+      params.youth_hitches = this.refs.youthHitches.getDOMNode().value,
+      $.ajax({
+        url: '/calculations',
+        dataType: 'json',
+        type: 'GET',
+        data: params,
+        success: function(data) {
+          this.setState({
+            results: data,
+            filledOut: true
+          });
+        }.bind(this),
+        error: function(xhr, status, err) {
+          console.error('/calculations', status, err.toString());
+        }.bind(this)
+      });
+    },
+
+    getInitialState: function() {
+      return {
+        currentAmount: 0,
+        servingSize: 0,
+        regularHitches: 0,
+        youthHitches: 0,
+        setRefs: {},
+        results: {},
+        filledOut: false
+      }
+    },
+
+    render: function() {
+      if (this.state.filledOut) {
+        var servings = this.state.results.servings_needed;
+        var pounds = this.state.results.pounds_needed;
+        return (
+          <div className="container jumbotron">
+            <h2>Servings Needed: { servings }</h2>
+            <h2>Pounds Needed: { pounds }</h2>
+          </div>
+        );
+      } else {
+        return (
+          <div className="container jumbotron">
+            <input ref='currentAmount' type="text" placeholder="Current Amount (in pounds)" className="form-control" />
+            <input ref='servingSize' type="text" placeholder="Serving Size (in pounds)" className="form-control" />
+            <input ref='regularHitches' type="text" placeholder="Number of Regular Hitches" className="form-control" />
+            <input ref='youthHitches' type="text" placeholder="Number of Youth Hitches" className="form-control" />
+            <button className="btn btn-primary" onClick={this.submit}>Submit</button>
+          </div>
+        );
+      }
+    } 
+  });
+
+  var component = React.render(
+    <TestComponent />,
+    document.getElementById('app')
+  );
+</script>
